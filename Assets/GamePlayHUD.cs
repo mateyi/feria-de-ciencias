@@ -9,6 +9,8 @@ using TMPro;
 /// </summary>
 public class GameplayHUD : MonoBehaviour
 {
+    public static GameplayHUD Instance { get; private set; }
+
     [Header("Textos")]
     [SerializeField] private TMP_Text coinsText;
     [SerializeField] private TMP_Text scoreText;
@@ -16,6 +18,12 @@ public class GameplayHUD : MonoBehaviour
     [Header("Barras (en el Slider: Min Value 0, Max Value 1)")]
     [SerializeField] private Slider progressBar;
     [SerializeField] private Slider energyBar;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
 
     public void SetCoins(int coins)
     {
