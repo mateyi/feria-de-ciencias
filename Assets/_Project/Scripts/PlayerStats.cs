@@ -38,6 +38,13 @@ public class PlayerStats : MonoBehaviour
         OnStatsChanged?.Invoke();
     }
 
+    /// <summary>Suma energía (p. ej. al recoger una lata de Red Bull).</summary>
+    public void AddEnergy(float amount)
+    {
+        energy = Mathf.Clamp(energy + amount, 0, 100);
+        OnStatsChanged?.Invoke();
+    }
+
     public void ResetStats()
     {
         speed = 50f; energy = 100f; skill = 50f; popularity = 50f;

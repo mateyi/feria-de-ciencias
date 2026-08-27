@@ -1,13 +1,18 @@
 using UnityEngine;
 
 /// <summary>
-/// Moneda coleccionable. Al tocarla el jugador suma 1 moneda y desaparece.
+/// Coleccionable estilo lata de Red Bull. Al tocarla el jugador suma "monedas"
+/// (para el contador del HUD) y recupera energía para poder seguir corriendo.
 /// </summary>
 public class Coin : MonoBehaviour
 {
-    [SerializeField] private float rotateSpeed = 180f;
+    [SerializeField] private float rotateSpeed = 120f;
     [SerializeField] private float bobAmplitude = 0.15f;
     [SerializeField] private float bobSpeed = 2f;
+
+    [Header("Recompensa")]
+    [Tooltip("Energía que recupera el jugador al recoger la lata.")]
+    [SerializeField] private float energyRestore = 12f;
 
     private Vector3 _startPos;
 
@@ -29,6 +34,7 @@ public class Coin : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             RunnerGameManager.Instance?.AddCoin();
+            PlayerStats.Instance?.AddEnergy(energyRestore);
             gameObject.SetActive(false);
         }
     }

@@ -194,6 +194,19 @@ public class PlayerController : MonoBehaviour
         CurrentLane = 1;
         _targetX    = LaneSystem.GetLaneX(CurrentLane);
         _velocity   = Vector3.zero;
-        transform.position = position;
+        _isJumping  = false;
+
+        // Teletransportar al CharacterController de forma segura:
+        // desactivarlo evita que quede "atascado" o clipee al reposicionar.
+        if (_cc != null)
+        {
+            _cc.enabled = false;
+            transform.position = position;
+            _cc.enabled = true;
+        }
+        else
+        {
+            transform.position = position;
+        }
     }
 }
