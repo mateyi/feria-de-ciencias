@@ -4,10 +4,15 @@ using TMPro;
 
 /// <summary>
 /// Una tarjeta de jugador dentro del panel de seleccion: retrato, nombre, pais,
-/// los bonus que aporta y el boton para equiparlo.
+/// los bonus que aporta, el precio y el boton para comprarlo o equiparlo.
 ///
 /// No se coloca a mano: CharacterSelectUI instancia esta tarjeta (la
 /// "plantilla") una vez por cada CharacterData del catalogo.
+///
+/// Estados del boton:
+///   COMPRAR  -> todavia no lo tiene (se apaga si no le alcanzan las monedas)
+///   EQUIPAR  -> ya es suyo y lo puede poner
+///   EQUIPADO -> es el que esta jugando ahora
 ///
 /// Carpeta: Assets/_Project/Scripts/UI/
 /// </summary>
@@ -18,6 +23,7 @@ public class CharacterCardUI : MonoBehaviour
     [SerializeField] private TMP_Text nombreText;
     [SerializeField] private TMP_Text paisText;
     [SerializeField] private TMP_Text statsText;
+    [SerializeField] private TMP_Text precioText;
     [SerializeField] private Button   botonEquipar;
     [SerializeField] private TMP_Text botonLabel;
     [SerializeField] private Image    fondo;
@@ -26,9 +32,11 @@ public class CharacterCardUI : MonoBehaviour
     [Header("Colores")]
     [SerializeField] private Color colorNormal    = new Color(0.12f, 0.16f, 0.24f, 0.98f);
     [SerializeField] private Color colorEquipado  = new Color(0.10f, 0.30f, 0.20f, 0.98f);
+    [SerializeField] private Color colorPrecio    = new Color(1f, 0.84f, 0.25f, 1f);
+    [SerializeField] private Color colorSinPlata   = new Color(1f, 0.42f, 0.37f, 1f);
 
-    private CharacterData      _personaje;
-    private CharacterSelectUI   _panel;
+    private CharacterData     _personaje;
+    private CharacterSelectUI _panel;
 
     // ─── Configuracion ────────────────────────────────────────────────────────
 
@@ -52,24 +60,44 @@ public class CharacterCardUI : MonoBehaviour
         if (botonEquipar != null)
         {
             botonEquipar.onClick.RemoveAllListeners();
-            botonEquipar.onClick.AddListener(Equipar);
+            botonEquipar.onClick.AddListener(TocarBoton);
         }
 
         Refrescar();
     }
 
-    /// <summary>Repinta los bonus y el estado del boton segun quien este equipado.</summary>
+    /// <summary>Repinta el precio, los bonus y el estado del boton.</summary>
     public void Refrescar()
     {
         if (_personaje == null) return;
 
-        bool equipado = CharacterManager.Instance != null &&
-                        CharacterManager.Instance.Equipado == _personaje;
+        var cm = CharacterManager.Instance;
+        bool poseido  = cm != null && cm.Posee(_personaje);
+        bool equipado = cm != null && cm.Equipado == _personaje;
+        bool alcanza  = cm != null && cm.PuedeComprar(_personaje);
 
         if (statsText != null) statsText.text = ConstruirBonus(_personaje);
 
-        if (botonLabel != null) botonLabel.text = equipado ? "EQUIPADO" : "EQUIPAR";
-        if (botonEquipar != null) botonEquipar.interactable = !equipado;
+        // Precio: se tacha en verde cuando ya es suyo, y se pone rojo si no alcanza.
+        if (precioText != null)
+        {
+            if (poseido)
+            {
+                precioText.text  = "YA ES TUYO";
+                precioText.color = new Color(0.45f, 0.85f, 0.55f, 1f);
+            }
+            else
+            {
+                precioText.text  = "$" + _personaje.precio.ToString("N0");
+                precioText.color = alcanza ? colorPrecio : colorSinPlata;
+            }
+        }
+
+        if (botonLabel != null)
+            botonLabel.text = equipado ? "EQUIPADO" : (poseido ? "EQUIPAR" : "COMPRAR");
+
+        if (botonEquipar != null)
+            botonEquipar.interactable = equipado ? false : (poseido || alcanza);
 
         if (fondo != null) fondo.color = equipado ? colorEquipado : colorNormal;
     }
@@ -95,9 +123,9 @@ public class CharacterCardUI : MonoBehaviour
         return sb.ToString().TrimEnd();
     }
 
-    private void Equipar()
+    private void TocarBoton()
     {
         if (_personaje == null) return;
-        _panel?.Equipar(_personaje);
+        _panel?.TocarJugador(_personaje);
     }
 }

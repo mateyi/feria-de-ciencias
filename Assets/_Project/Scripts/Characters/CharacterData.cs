@@ -29,6 +29,14 @@ public class CharacterData : ScriptableObject
     [Tooltip("Color de la camiseta, se usa como acento de la tarjeta.")]
     public Color colorCamiseta = new Color(0.90f, 0.90f, 0.95f, 1f);
 
+    [Header("Compra")]
+    [Tooltip("Monedas que cuesta desbloquear a este jugador.")]
+    public int precio = 5000;
+
+    [Header("Modelo 3D")]
+    [Tooltip("Material del modelo riggeado con la camiseta del pais. Si queda vacio se usa el modelo generico.")]
+    public Material kit;
+
     [TextArea(2, 4)]
     public string estilo = "";
 

@@ -19,6 +19,10 @@ public class SaveData
     public List<int>    upgradeNiveles = new List<int>();
 
     public string personajeEquipado = "";
+
+    // Ids de los jugadores que ya se compraron. El jugador generico no figura aca:
+    // si la lista esta vacia y personajeEquipado esta vacio, se juega con el generico.
+    public List<string> personajesComprados = new List<string>();
 }
 
 /// <summary>
@@ -93,6 +97,7 @@ public static class SaveManager
 
         if (_data.upgradeIds == null)     _data.upgradeIds     = new List<string>();
         if (_data.upgradeNiveles == null) _data.upgradeNiveles = new List<int>();
+        if (_data.personajesComprados == null) _data.personajesComprados = new List<string>();
         if (_data.currentLevel < 1)       _data.currentLevel   = 1;
     }
 

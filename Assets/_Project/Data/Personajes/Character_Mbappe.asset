@@ -19,6 +19,8 @@ MonoBehaviour:
   dorsal: 10
   retrato: {fileID: 21300000, guid: 507078796dd118e41aff8f78b1f46143, type: 3}
   colorCamiseta: {r: 0, g: 0.33333334, b: 0.6431373, a: 1}
+  precio: 3000
+  kit: {fileID: 2100000, guid: 23555028eb0e7f14e9abf07046f0a448, type: 2}
   estilo: 
   bonusVelocidad: 14
   bonusEnergia: 0

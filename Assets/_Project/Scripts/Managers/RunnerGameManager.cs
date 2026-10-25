@@ -173,9 +173,6 @@ public class RunnerGameManager : MonoBehaviour
 
         if (PlayerStats.Instance != null) PlayerStats.Instance.ResetStats();
 
-        // El jugador equipado en el panel de personajes suma sus bonus.
-        CharacterManager.Instance?.AplicarAlJugador();
-
         // Recargar los escudos comprados en la tienda para esta partida.
         UpgradeManager.Instance?.ReiniciarRun();
 
@@ -194,6 +191,14 @@ public class RunnerGameManager : MonoBehaviour
                 ? playerSpawnPoint.position
                 : new Vector3(0, 0.5f, 0);
             _player.Respawn(spawnPos);
+        }
+
+        // El jugador equipado suma sus bonus y su camiseta. Va despues de crear al
+        // jugador, porque PlayerStats.Instance recien existe una vez instanciado.
+        if (CharacterManager.Instance != null && _player != null)
+        {
+            CharacterManager.Instance.AplicarAlJugador();
+            CharacterManager.Instance.AplicarModelo(_player.gameObject);
         }
 
         TrackGenerator.Instance?.ResetTrack();
@@ -290,6 +295,7 @@ public class RunnerGameManager : MonoBehaviour
         {
             SetState(GameState.LevelComplete);
             GameData.Instance?.TrySetBestScore(Score);
+            PagarPartida();
             // Avanzar nivel
             if (GameData.Instance != null)
                 GameData.Instance.SetCurrentLevel(GameData.Instance.CurrentLevel + 1);
@@ -310,7 +316,32 @@ public class RunnerGameManager : MonoBehaviour
 
         SetState(GameState.GameOver);
         GameData.Instance?.TrySetBestScore(Score);
+        PagarPartida();
         StartCoroutine(ShowGameOverDelay());
+    }
+
+    // ─── Pago por partida ────────────────────────────────────────────────────
+
+    /// <summary>Monedas fijas que deja cualquier partida, aunque salga mal.</summary>
+    private const int PagoBase = 1000;
+
+    /// <summary>Monedas extra por cada punto de puntaje.</summary>
+    private const int PagoPorPunto = 4;
+
+    /// <summary>
+    /// Monedas que deja la partida al cerrarse. Una carrera de unos 660 puntos
+    /// paga unas 3.640 monedas, asi que con tres buenas carreras se llega al
+    /// jugador mas caro (Messi, 10.000).
+    /// </summary>
+    private void PagarPartida()
+    {
+        if (GameData.Instance == null) return;
+
+        int pago = PagoBase + Mathf.Max(0, Score) * PagoPorPunto;
+        GameData.Instance.AddCoins(pago);
+        UpdateHUD();
+
+        Debug.Log($"[RunnerGameManager] Pago de la partida: {pago} monedas (puntaje {Score}).");
     }
 
     // ─── Helpers privados ─────────────────────────────────────────────────────

@@ -5,7 +5,11 @@ using TMPro;
 
 /// <summary>
 /// Panel de seleccion de jugador. Arma una tarjeta por cada CharacterData del
-/// catalogo, resalta la equipada y deja cambiarla tocando su boton.
+/// catalogo, muestra el precio de las que faltan comprar, resalta la equipada y
+/// deja comprar o cambiar de jugador tocando su boton.
+///
+/// La grilla vive dentro de un ScrollRect, asi que se puede arrastrar hacia
+/// abajo con el mouse para ver las tarjetas que no entran en pantalla.
 ///
 /// Va en Canvas/CharactersPanel. Las tarjetas se instancian desde una plantilla
 /// que queda desactivada dentro del contenedor.
@@ -85,14 +89,27 @@ public class CharacterSelectUI : MonoBehaviour
         _construido = true;
     }
 
-    // ─── Seleccion ────────────────────────────────────────────────────────────
+    // ─── Seleccion y compra ───────────────────────────────────────────────────
 
-    /// <summary>La llaman las tarjetas cuando tocan su boton.</summary>
-    public void Equipar(CharacterData personaje)
+    /// <summary>
+    /// La llaman las tarjetas cuando tocan su boton: compra al jugador si falta
+    /// comprarlo, o lo equipa si ya es suyo.
+    /// </summary>
+    public void TocarJugador(CharacterData personaje)
     {
-        if (CharacterManager.Instance == null || personaje == null) return;
+        var cm = CharacterManager.Instance;
+        if (cm == null || personaje == null) return;
 
-        CharacterManager.Instance.Equipar(personaje);
+        if (!cm.Posee(personaje))
+        {
+            if (!cm.PuedeComprar(personaje)) return;
+            cm.Comprar(personaje);
+        }
+        else
+        {
+            cm.Equipar(personaje);
+        }
+
         Refrescar();
     }
 
@@ -102,7 +119,7 @@ public class CharacterSelectUI : MonoBehaviour
     public void Refrescar()
     {
         if (monedasText != null && GameData.Instance != null)
-            monedasText.text = GameData.Instance.Coins.ToString();
+            monedasText.text = GameData.Instance.Coins.ToString("N0");
 
         foreach (var t in _tarjetas)
             if (t != null) t.Refrescar();
