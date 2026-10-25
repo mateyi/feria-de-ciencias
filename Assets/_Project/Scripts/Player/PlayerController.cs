@@ -46,6 +46,29 @@ public class PlayerController : MonoBehaviour
         baseForwardSpeed * (1f + (PlayerStats.Instance != null ? PlayerStats.Instance.speed / 200f : 0f))
                          * (1f + (UpgradeManager.Instance != null ? UpgradeManager.Instance.BonusVelocidad : 0f));
 
+    // ─── Estado para el sistema de obstáculos (Fase B) ────────────────────────
+
+    /// <summary>
+    /// Metros que el jugador tiene los pies por encima del piso. Es 0 cuando
+    /// está apoyado. Lo usan los obstáculos bajos para saber si los saltó.
+    /// </summary>
+    public float AlturaSobrePiso { get; private set; }
+
+    /// <summary>
+    /// True durante el segundo de gracia después de un choque. Mientras está
+    /// prendido no se descuenta energía de nuevo (evita daño múltiple).
+    /// </summary>
+    public bool Invulnerable { get; private set; }
+
+    /// <summary>True si el jugador está en el aire (saltando).</summary>
+    public bool EstaEnElAire => !IsGrounded;
+
+    /// <summary>Multiplicador temporal de velocidad (lo usa la ralentización).</summary>
+    private float _modificadorVelocidad = 1f;
+
+    /// <summary>Último Y del piso donde estuvo apoyado, para medir el salto.</summary>
+    private float _ySuelo;
+
     // ─── Privados ─────────────────────────────────────────────────────────────
     private CharacterController _cc;
     private Vector3 _velocity;
@@ -178,13 +201,39 @@ public class PlayerController : MonoBehaviour
             (UpgradeManager.Instance != null ? UpgradeManager.Instance.MultiplicadorCambioCarril : 1f);
         float newX     = Mathf.MoveTowards(currentX, _targetX, velocidadCarril * Time.deltaTime);
 
+        // Velocidad del nivel (la define el LevelConfig de la Fase B) y
+        // ralentización temporal por choque con un árbitro, por ejemplo.
+        float multiplicadorNivel = ObstacleManager.Instance != null
+            ? ObstacleManager.Instance.MultiplicadorVelocidadNivel
+            : 1f;
+
+        // Pickup de botines turbo (Fase C): acelera mientras dura el efecto.
+        float multiplicadorTurbo = PickupManager.Instance != null
+            ? PickupManager.Instance.MultiplicadorVelocidad
+            : 1f;
+
         Vector3 move = new Vector3(
             newX - currentX,
             _velocity.y * Time.deltaTime,
-            CurrentSpeed * (RunnerGameManager.Instance != null ? RunnerGameManager.Instance.SpeedMultiplier : 1f) * Time.deltaTime
+            CurrentSpeed * multiplicadorNivel * multiplicadorTurbo * _modificadorVelocidad
+                * (RunnerGameManager.Instance != null ? RunnerGameManager.Instance.SpeedMultiplier : 1f)
+                * Time.deltaTime
         );
 
         _cc.Move(move);
+
+        // ── Altura sobre el piso (para los obstáculos que se pueden saltar) ──
+        // Cuando está apoyado guardamos el Y del piso; cuando vuela, la
+        // diferencia contra ese piso es lo alto que pasó.
+        if (IsGrounded)
+        {
+            _ySuelo = transform.position.y;
+            AlturaSobrePiso = 0f;
+        }
+        else
+        {
+            AlturaSobrePiso = Mathf.Max(0f, transform.position.y - _ySuelo);
+        }
     }
 
     public void MoveLeft()
@@ -247,9 +296,90 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Mata al jugador y notifica al GameManager.
-    /// Si tiene escudos comprados en la tienda, el primero absorbe el choque.
+    /// Recibe el golpe de un obstáculo: descuenta energía de la barra, da un
+    /// segundo de invulnerabilidad, parpadea y (si corresponde) ralentiza.
+    ///
+    /// Ya NO mata de un toque como el Obstacle viejo: solo resta energía. La
+    /// derrota llega cuando la barra queda en cero.
     /// </summary>
+    public void RecibirChoque(float danioEnergia, float duracionRalentizacion)
+    {
+        if (!IsAlive) return;
+        if (Invulnerable) return;
+
+        // Escudo comprado en la tienda: absorbe el choque entero.
+        if (UpgradeManager.Instance != null && UpgradeManager.Instance.ConsumirEscudo())
+        {
+            StartCoroutine(Invulnerabilidad());
+            return;
+        }
+
+        PlayerStats.Instance?.DrainEnergy(danioEnergia);
+
+        // Refrescamos la barra del HUD en el acto (no esperamos al Update).
+        if (GameplayHUD.Instance != null && PlayerStats.Instance != null)
+            GameplayHUD.Instance.SetEnergy(PlayerStats.Instance.EnergyNormalized);
+
+        StartCoroutine(Invulnerabilidad());
+        StartCoroutine(Parpadeo());
+
+        if (duracionRalentizacion > 0.01f)
+            StartCoroutine(Ralentizar(duracionRalentizacion));
+
+        // Energía en cero = derrota de nivel.
+        if (PlayerStats.Instance != null && PlayerStats.Instance.energy <= 0f)
+            Die();
+    }
+
+    /// <summary>Deja al jugador invulnerable un segundo (lo configura ObstacleManager).</summary>
+    private System.Collections.IEnumerator Invulnerabilidad()
+    {
+        Invulnerable = true;
+
+        float duracion = ObstacleManager.Instance != null
+            ? ObstacleManager.Instance.TiempoInvulnerabilidad
+            : 1f;
+
+        yield return new WaitForSeconds(duracion);
+        Invulnerable = false;
+    }
+
+    /// <summary>Hace parpadear al jugador mientras dura la invulnerabilidad.</summary>
+    private System.Collections.IEnumerator Parpadeo()
+    {
+        // Buscamos todos los renderers del modelo (el jugador puede tener malla
+        // skinned + accesorios).
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        if (renderers.Length == 0) yield break;
+
+        const float intervalo = 0.1f;
+        float transcurrido = 0f;
+        bool visible = false;
+
+        while (transcurrido < (ObstacleManager.Instance != null
+                                ? ObstacleManager.Instance.TiempoInvulnerabilidad
+                                : 1f))
+        {
+            visible = !visible;
+            foreach (var r in renderers) if (r != null) r.enabled = visible;
+
+            yield return new WaitForSeconds(intervalo);
+            transcurrido += intervalo;
+        }
+
+        // Siempre termina visible: si queda apagado el jugador desaparece.
+        foreach (var r in renderers) if (r != null) r.enabled = true;
+    }
+
+    /// <summary>Baja la velocidad un rato (tarjeta amarilla del árbitro, tackle).</summary>
+    private System.Collections.IEnumerator Ralentizar(float duracion)
+    {
+        _modificadorVelocidad = 0.45f;
+        yield return new WaitForSeconds(duracion);
+        _modificadorVelocidad = 1f;
+    }
+
+    /// <summary>Mata al jugador y notifica al GameManager.</summary>
     public void Die()
     {
         if (!IsAlive) return;
@@ -271,6 +401,15 @@ public class PlayerController : MonoBehaviour
         _targetX      = LaneSystem.GetLaneX(CurrentLane);
         _velocity     = Vector3.zero;
         _isJumping    = false;
+
+        // Limpiamos el estado de combate de la Fase B: al reaparecer no queda
+        // invulnerable, ralentizado ni parpadeando.
+        StopAllCoroutines();
+        Invulnerable = false;
+        _modificadorVelocidad = 1f;
+        AlturaSobrePiso = 0f;
+        foreach (var r in GetComponentsInChildren<Renderer>(true))
+            if (r != null) r.enabled = true;
 
         // Desactivar el CharacterController antes de teletransportar para evitar
         // que quede atascado en la geometría.

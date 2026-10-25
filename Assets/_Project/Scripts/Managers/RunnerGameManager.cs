@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System.Collections;
 
 /// <summary>
@@ -26,6 +27,9 @@ public class RunnerGameManager : MonoBehaviour
     /// <summary>Retrocompatibilidad: otros scripts que chequeaban IsPlaying siguen funcionando.</summary>
     public bool IsPlaying => State == GameState.Running;
 
+    /// <summary>True mientras el jugador tiene el juego en pausa (Fase E).</summary>
+    public bool Pausado { get; private set; }
+
     public int   Score           { get; private set; }
     public float SpeedMultiplier { get; private set; } = 1f;
 
@@ -51,6 +55,10 @@ public class RunnerGameManager : MonoBehaviour
     [Header("Prefab del jugador")]
     [SerializeField] private GameObject playerPrefab;
 
+    [Header("Pausa (Fase E)")]
+    [Tooltip("Panel que se muestra mientras el jugador mantiene la pausa (Canvas/PausePanel).")]
+    [SerializeField] private GameObject pausePanel;
+
     // ─── Privados ────────────────────────────────────────────────────────────
     private float _scoreAccum;
     private PlayerController _player;
@@ -59,6 +67,11 @@ public class RunnerGameManager : MonoBehaviour
     private bool      _metaCruzada;      // ya pasó el arco de META
     private bool      _penalIniciado;    // ya se cedió el control al minijuego
     private Coroutine _esperaPenal;
+
+    // Etapa del torneo que se está jugando en ESTA partida. Se guarda al arrancar
+    // porque al terminarla hay que saber si la que se superó era la FINAL (ahí el
+    // jugador sale campeón del mundo y el torneo vuelve a empezar).
+    private int _nivelJugado = 1;
 
     // ─── Unity ────────────────────────────────────────────────────────────────
     private void Awake()
@@ -119,6 +132,14 @@ public class RunnerGameManager : MonoBehaviour
 
     private void Update()
     {
+        // Fase E: con Escape se pausa y se reanuda. Va antes del corte por estado
+        // porque en pausa el estado sigue siendo Running.
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            if (Pausado) ResumeGame();
+            else         PauseGame();
+        }
+
         // Solo acumular puntaje y drenar energía mientras el runner está activo.
         if (State != GameState.Running) return;
 
@@ -162,9 +183,21 @@ public class RunnerGameManager : MonoBehaviour
     /// <summary>Inicia o reinicia una partida completa desde el menú.</summary>
     public void StartGame()
     {
+        // Si veníamos de una pausa, el tiempo tiene que volver a correr.
+        Pausado = false;
+        Time.timeScale = 1f;
+        if (pausePanel != null) pausePanel.SetActive(false);
+
         Score           = 0;
         SpeedMultiplier = 1f;
         _scoreAccum     = 0f;
+
+        // Qué etapa del torneo se juega. Se recorta al rango válido para que un
+        // guardado viejo (o un nivel de prueba) no deje al jugador fuera del
+        // torneo ni lo mande más allá de la final.
+        LevelConfig config = ObstacleManager.Configuracion;
+        int guardado = GameData.Instance != null ? GameData.Instance.CurrentLevel : 1;
+        _nivelJugado = Mathf.Clamp(guardado, 1, config != null ? config.NivelFinal : 1);
 
         // Reiniciar el tramo META → túnel → penal.
         _metaCruzada   = false;
@@ -209,20 +242,75 @@ public class RunnerGameManager : MonoBehaviour
         SetState(GameState.Running);
         UIManager.Instance?.ShowScreen(UIScreen.Gameplay);
         UpdateHUD();
+
+        // Nombre de la etapa arriba al centro del HUD.
+        GameplayHUD.Instance?.SetEtapa(NombreEtapa(_nivelJugado));
     }
 
+    /// <summary>
+    /// Nombre deportivo de la etapa pedida (Entrenamiento, Octavos de final, ...).
+    /// Si todavía no hay LevelConfig devuelve un texto de respaldo.
+    /// </summary>
+    private static string NombreEtapa(int nivel)
+    {
+        LevelConfig config = ObstacleManager.Configuracion;
+        return config != null ? config.NombreDeEtapa(nivel) : "Nivel " + nivel;
+    }
+
+    // ─── Pausa (Fase E) ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Pausa pedida por el jugador: congela el tiempo y muestra el panel.
+    /// El estado del juego NO cambia (sigue en Running): así todo lo que ya
+    /// chequea Running sigue funcionando y, como Time.timeScale vale 0, nada
+    /// avanza igual.
+    /// </summary>
     public void PauseGame()
     {
-        // Solo pausar si estamos corriendo (no interrumpir el penal)
-        if (State == GameState.Running)
-            Time.timeScale = 0f;
+        // Solo pausar si estamos corriendo (no interrumpir el penal).
+        if (State != GameState.Running || Pausado) return;
+
+        Pausado = true;
+        Time.timeScale = 0f;
+        if (pausePanel != null) pausePanel.SetActive(true);
+
+        Debug.Log("[RunnerGameManager] Juego en pausa.");
     }
 
+    /// <summary>Saca la pausa: devuelve el tiempo a la normalidad y esconde el panel.</summary>
     public void ResumeGame()
     {
-        if (State == GameState.Running)
-            Time.timeScale = 1f;
+        if (!Pausado) return;
+
+        Time.timeScale = 1f;
+        if (pausePanel != null) pausePanel.SetActive(false);
+        Pausado = false;
+
+        Debug.Log("[RunnerGameManager] Juego reanudado.");
     }
+
+    /// <summary>Botón "MENU" del panel de pausa: cierra la partida y vuelve al menú.</summary>
+    public void VolverAlMenuDesdePausa()
+    {
+        ResumeGame();   // devuelve el tiempo antes de cambiar de pantalla
+
+        SetState(GameState.MainMenu);
+
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.SetRunnerEnabled(false);
+
+        UIManager.Instance?.ShowScreen(UIScreen.MainMenu);
+    }
+
+    /// <summary>
+    /// Congela el tiempo sin mostrar el panel. Lo usan otros sistemas que
+    /// necesitan frenar el mundo (por ejemplo las decisiones) y no quieren que
+    /// aparezca la pantalla de pausa del jugador.
+    /// </summary>
+    public void CongelarTiempo() => Time.timeScale = 0f;
+
+    /// <summary>Vuelve a la velocidad normal sin tocar el panel de pausa.</summary>
+    public void ReanudarTiempo() => Time.timeScale = 1f;
 
     /// <summary>
     /// Llamado por FinishArchTrigger cuando el jugador cruza la META.
@@ -288,17 +376,33 @@ public class RunnerGameManager : MonoBehaviour
         _esperaPenal = null;
     }
 
-    /// <summary>Llamado por PenaltyMinigameManager cuando el jugador convierte el penal.</summary>
+    /// <summary>
+    /// Llamado por PenaltyMinigameManager cuando el jugador convierte el penal.
+    ///
+    /// Si la etapa que se acaba de ganar era la FINAL, el jugador sale campeón
+    /// del mundo: se muestra la frase de campeón y el torneo vuelve a empezar por
+    /// la primera etapa. Si no, simplemente avanza a la etapa siguiente.
+    /// </summary>
     public void OnLevelComplete()
     {
-        if (State == GameState.PenaltyMinigame)
+        if (State != GameState.PenaltyMinigame) return;
+
+        SetState(GameState.LevelComplete);
+        GameData.Instance?.TrySetBestScore(Score);
+        PagarPartida();
+
+        LevelConfig config = ObstacleManager.Configuracion;
+        bool eraFinal = config != null && config.EsFinal(_nivelJugado);
+
+        if (eraFinal)
         {
-            SetState(GameState.LevelComplete);
-            GameData.Instance?.TrySetBestScore(Score);
-            PagarPartida();
-            // Avanzar nivel
-            if (GameData.Instance != null)
-                GameData.Instance.SetCurrentLevel(GameData.Instance.CurrentLevel + 1);
+            // Campeón del mundo: el torneo arranca de nuevo desde la primera etapa.
+            if (GameData.Instance != null) GameData.Instance.SetCurrentLevel(1);
+            StartCoroutine(ShowCampeonDelay());
+        }
+        else
+        {
+            if (GameData.Instance != null) GameData.Instance.SetCurrentLevel(_nivelJugado + 1);
             StartCoroutine(ShowLevelCompleteDelay());
         }
     }
@@ -359,11 +463,20 @@ public class RunnerGameManager : MonoBehaviour
         GameOverUI.Instance?.Show(Score);
     }
 
+    /// <summary>Pantalla de victoria normal: se superó una etapa y sigue el torneo.</summary>
     private IEnumerator ShowLevelCompleteDelay()
     {
         yield return new WaitForSeconds(1.5f);
         UIManager.Instance?.ShowScreen(UIScreen.LevelComplete);
-        LevelCompleteUI.Instance?.Show(Score);
+        LevelCompleteUI.Instance?.Show(Score, _nivelJugado, false);
+    }
+
+    /// <summary>Pantalla de campeón: se ganó la FINAL del torneo.</summary>
+    private IEnumerator ShowCampeonDelay()
+    {
+        yield return new WaitForSeconds(1.5f);
+        UIManager.Instance?.ShowScreen(UIScreen.LevelComplete);
+        LevelCompleteUI.Instance?.Show(Score, _nivelJugado, true);
     }
 
     // ─── HUD ─────────────────────────────────────────────────────────────────

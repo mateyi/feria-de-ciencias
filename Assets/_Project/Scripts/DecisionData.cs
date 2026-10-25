@@ -3,6 +3,9 @@ using UnityEngine;
 /// <summary>
 /// ScriptableObject que define una decisión de vida del futbolista.
 /// Crea instancias desde Assets > Create > MundialRunner > DecisionData.
+///
+/// DESACTIVADO: reemplazado por el sistema de obstáculos.
+/// Los datos se conservan porque el prefab Segment_Decision todavía los referencia.
 /// </summary>
 [CreateAssetMenu(fileName = "Decision_New", menuName = "MundialRunner/DecisionData")]
 public class DecisionData : ScriptableObject

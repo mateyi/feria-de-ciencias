@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acee5baac23a9b448adaa06d91f1c4a, type: 3}
+  m_Name: OD_Invasor
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleData
+  id: invasor
+  tipo: 2
+  prefab: {fileID: 802024587408241913, guid: dab267c9486bec340b51ce801b30b309, type: 3}
+  danioEnergia: 15
+  efecto: 3
+  duracionRalentizacion: 1
+  nivelMinimo: 5
+  peso: 0.7
+  carrilesQueOcupa: 1
+  sePuedeSaltar: 0
+  velocidadLateral: 9
+  tiempoTelegrafiado: 0.9
+  altura: 1.4

@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Datos persistentes del jugador: monedas, mejor puntaje y nivel actual.
+/// Datos persistentes del jugador: monedas, mejor puntaje, nivel actual y los
+/// ajustes de sonido y brillo (Fase F).
 ///
 /// FASE 16: el guardado pasó a SaveManager, que escribe un archivo JSON en
 /// Application.persistentDataPath. Esta clase queda como fachada para que el
@@ -17,6 +18,11 @@ public class GameData : MonoBehaviour
     public int Coins        => SaveManager.Data.coins;
     public int BestScore    => SaveManager.Data.bestScore;
     public int CurrentLevel => SaveManager.Data.currentLevel;
+
+    // Ajustes de sonido y brillo (Fase F).
+    public float Volumen    => SaveManager.Data.volumen;
+    public float Brillo     => SaveManager.Data.brillo;
+    public bool  Silenciado => SaveManager.Data.silenciado;
 
     // La UI se suscribe a esto para refrescarse sola cuando cambian los datos
     public event System.Action OnDataChanged;
@@ -64,4 +70,31 @@ public class GameData : MonoBehaviour
         SaveManager.Guardar();
         OnDataChanged?.Invoke();
     }
+
+    // ─── Ajustes de sonido y brillo (Fase F) ─────────────────────────────────
+    // Los cambios se aplican al instante en AudioListener.volume y en el velo
+    // del brillo; acá sólo se dejan anotados. El disco se escribe después, con
+    // GuardarAjustes(), para no guardar en cada frame mientras se arrastra un
+    // slider.
+
+    public void SetVolumen(float valor)
+    {
+        SaveManager.Data.volumen = Mathf.Clamp01(valor);
+        SaveManager.Data.ajustesGuardados = true;
+    }
+
+    public void SetBrillo(float valor)
+    {
+        SaveManager.Data.brillo = Mathf.Clamp01(valor);
+        SaveManager.Data.ajustesGuardados = true;
+    }
+
+    public void SetSilenciado(bool valor)
+    {
+        SaveManager.Data.silenciado = valor;
+        SaveManager.Data.ajustesGuardados = true;
+    }
+
+    /// <summary>Escribe los ajustes en el archivo de guardado.</summary>
+    public void GuardarAjustes() => SaveManager.Guardar();
 }

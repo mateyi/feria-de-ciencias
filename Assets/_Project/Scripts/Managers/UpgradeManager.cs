@@ -100,4 +100,16 @@ public class UpgradeManager : MonoBehaviour
         Debug.Log($"[Escudo] Choque absorbido. Quedan {_escudosRestantes}.");
         return true;
     }
+
+    /// <summary>
+    /// Suma escudos durante la partida. Lo usa el pickup de chaleco (Fase C):
+    /// se suma a este mismo contador para no tener dos lógicas de escudo.
+    /// </summary>
+    public void AgregarEscudo(int cantidad)
+    {
+        if (cantidad <= 0) return;
+
+        _escudosRestantes += cantidad;
+        Debug.Log($"[Escudo] +{cantidad} del pickup. Total {_escudosRestantes}.");
+    }
 }

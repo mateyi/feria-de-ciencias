@@ -4,10 +4,19 @@ using System.Collections;
 /// <summary>
 /// Gestiona el flujo de las decisiones: pausa el juego, muestra el panel,
 /// espera la elección del jugador y aplica las consecuencias.
+///
+/// DESACTIVADO: reemplazado por el sistema de obstáculos.
+/// Los carteles de decisión de la pista ya no se generan (ver TrackGenerator) y
+/// este manager queda apagado por el flag "habilitado". El código se conserva
+/// entero por si se quiere reusar más adelante.
 /// </summary>
 public class DecisionManager : MonoBehaviour
 {
     public static DecisionManager Instance { get; private set; }
+
+    [Header("Sistema de decisiones (DESACTIVADO)")]
+    [Tooltip("Apagado: los carteles de decisión fueron reemplazados por los obstáculos.")]
+    [SerializeField] private bool habilitado = false;
 
     [Header("UI de decisión")]
     [SerializeField] private DecisionUI decisionUI;
@@ -28,6 +37,9 @@ public class DecisionManager : MonoBehaviour
 
     private void Update()
     {
+        // DESACTIVADO: reemplazado por el sistema de obstáculos.
+        if (!habilitado) return;
+
         if (!_waitingForChoice) return;
 
         _timer -= Time.unscaledDeltaTime;
@@ -42,13 +54,17 @@ public class DecisionManager : MonoBehaviour
 
     public void ShowDecision(DecisionData data, DecisionPoint point)
     {
+        // DESACTIVADO: reemplazado por el sistema de obstáculos.
+        if (!habilitado) return;
+
         if (data == null) return;
         _currentDecision = data;
         _currentPoint    = point;
         _waitingForChoice = true;
         _timer = decisionTimeLimit;
 
-        RunnerGameManager.Instance?.PauseGame();
+        // Freno del mundo sin panel: la pausa del jugador (Fase E) es aparte.
+        RunnerGameManager.Instance?.CongelarTiempo();
         decisionUI?.Show(data);
     }
 
@@ -66,7 +82,7 @@ public class DecisionManager : MonoBehaviour
         _currentPoint?.Resolve();
 
         decisionUI?.Hide();
-        RunnerGameManager.Instance?.ResumeGame();
+        RunnerGameManager.Instance?.ReanudarTiempo();
 
         // Cartel minimalista con los tres atributos que movió la elección.
         string label = isLeft ? _currentDecision.leftLabel : _currentDecision.rightLabel;

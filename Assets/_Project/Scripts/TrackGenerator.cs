@@ -4,6 +4,10 @@ using System.Collections.Generic;
 /// <summary>
 /// Genera la pista de forma procedural reciclando segmentos prefabricados.
 /// Mantiene siempre N segmentos adelante del jugador y recicla los que quedan atrás.
+///
+/// FASE A: los segmentos de decisión (carteles izquierda/derecha) se dejaron de
+/// generar. Ahora todos los segmentos son de obstáculos y monedas. El código de
+/// decisiones queda en el proyecto pero apagado, por si se vuelve a usar.
 /// </summary>
 public class TrackGenerator : MonoBehaviour
 {
@@ -11,20 +15,25 @@ public class TrackGenerator : MonoBehaviour
 
     [Header("Prefabs de segmentos")]
     [SerializeField] private TrackSegment[] normalSegmentPrefabs;
-    [SerializeField] private TrackSegment   decisionSegmentPrefab;
     [SerializeField] private TrackSegment   startSegmentPrefab;
 
     [Header("Configuración")]
     [SerializeField] private int   segmentsAhead    = 5;
     [SerializeField] private int   segmentsBehind   = 2;
-    [Tooltip("Cada cuántos segmentos normales aparece uno de decisión. " +
-             "En 1 el cartel aparece en segmentos alternados.")]
-    [SerializeField] private int   decisionInterval = 1;
 
-    [Tooltip("Z a partir de la cual ya no se generan segmentos de decisión. " +
-             "Sirve para que el último cartel quede ANTES del arco de META " +
-             "(z=300) y no caiga dentro del túnel.")]
+    // ─── DESACTIVADO: reemplazado por el sistema de obstáculos ───────────────
+    // Los carteles de decisión ya no se generan. Se dejan las referencias y los
+    // campos para no romper el prefab Segment_Decision ni los ScriptableObjects
+    // de decisiones que quedaron guardados en el proyecto.
+    [Header("Decisiones (DESACTIVADO)")]
+    [Tooltip("Dejalo apagado: los segmentos de decisión ya no se generan.")]
+    [SerializeField] private bool usarSegmentosDeDecision = false;
+    [SerializeField] private TrackSegment decisionSegmentPrefab;
+    [Tooltip("Cada cuántos segmentos normales aparecía uno de decisión.")]
+    [SerializeField] private int   decisionInterval = 1;
+    [Tooltip("Z a partir de la cual ya no se generaban segmentos de decisión.")]
     [SerializeField] private float decisionStopZ    = 270f;
+    // ────────────────────────────────────────────────────────────────────────
 
     private readonly List<TrackSegment> _activeSegments = new List<TrackSegment>();
     private Vector3 _nextSpawnPos;
@@ -157,7 +166,11 @@ public class TrackGenerator : MonoBehaviour
 
     private void SpawnNextSegment()
     {
-        bool spawnDecision = _normalSegmentsSinceDecision >= decisionInterval
+        // FASE A: la condición arranca con "usarSegmentosDeDecision", que está en
+        // false. Así nunca se genera un Segment_Decision y toda la pista usa los
+        // prefabs normales (obstáculos y monedas).
+        bool spawnDecision = usarSegmentosDeDecision
+                             && _normalSegmentsSinceDecision >= decisionInterval
                              && decisionSegmentPrefab != null
                              && _nextSpawnPos.z < decisionStopZ;
 

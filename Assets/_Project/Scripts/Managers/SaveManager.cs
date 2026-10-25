@@ -23,6 +23,19 @@ public class SaveData
     // Ids de los jugadores que ya se compraron. El jugador generico no figura aca:
     // si la lista esta vacia y personajeEquipado esta vacio, se juega con el generico.
     public List<string> personajesComprados = new List<string>();
+
+    // ─── Ajustes de sonido y pantalla (Fase F) ────────────────────────────────
+    // volumen y brillo van de 0 a 1. "silenciado" es un interruptor aparte:
+    // guarda el volumen elegido y lo aplica como 0 mientras esté prendido.
+    public float volumen = SaveManager.VolumenPorDefecto;
+    public float brillo  = SaveManager.BrilloPorDefecto;
+    public bool  silenciado;
+
+    // True recién cuando el jugador movió algún ajuste. Un guardado de antes de
+    // la Fase F no tiene estos campos (quedan en 0), así que con esta marca se
+    // detecta y se completan con los valores por defecto en lugar de arrancar
+    // con el juego mudo y la pantalla negra.
+    public bool ajustesGuardados;
 }
 
 /// <summary>
@@ -38,6 +51,12 @@ public class SaveData
 public static class SaveManager
 {
     const string NombreArchivo = "mundialrunner_save.json";
+
+    /// <summary>Volumen general con el que arranca el juego la primera vez.</summary>
+    public const float VolumenPorDefecto = 0.8f;
+
+    /// <summary>Brillo con el que arranca el juego: 1 = sin velo de oscurecido.</summary>
+    public const float BrilloPorDefecto = 1f;
 
     // Claves viejas de PlayerPrefs, sólo para la migración inicial.
     const string KeyCoinsVieja = "coins";
@@ -99,6 +118,19 @@ public static class SaveManager
         if (_data.upgradeNiveles == null) _data.upgradeNiveles = new List<int>();
         if (_data.personajesComprados == null) _data.personajesComprados = new List<string>();
         if (_data.currentLevel < 1)       _data.currentLevel   = 1;
+
+        // Ajustes de sonido y brillo (Fase F). Si el guardado es anterior a la
+        // fase, no trae estos campos y hay que dejarlos en los valores por
+        // defecto.
+        if (!_data.ajustesGuardados)
+        {
+            _data.volumen    = VolumenPorDefecto;
+            _data.brillo     = BrilloPorDefecto;
+            _data.silenciado = false;
+        }
+
+        _data.volumen = Mathf.Clamp01(_data.volumen);
+        _data.brillo  = Mathf.Clamp01(_data.brillo);
     }
 
     public static void Guardar()

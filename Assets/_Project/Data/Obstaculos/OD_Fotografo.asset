@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8acee5baac23a9b448adaa06d91f1c4a, type: 3}
+  m_Name: OD_Fotografo
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleData
+  id: fotografo
+  tipo: 0
+  prefab: {fileID: 28426551386406779, guid: f4acd376d0e8b754bb997164e38bce71, type: 3}
+  danioEnergia: 10
+  efecto: 0
+  duracionRalentizacion: 0
+  nivelMinimo: 4
+  peso: 0.6
+  carrilesQueOcupa: 1
+  sePuedeSaltar: 0
+  velocidadLateral: 0
+  tiempoTelegrafiado: 1.2
+  altura: 1.9

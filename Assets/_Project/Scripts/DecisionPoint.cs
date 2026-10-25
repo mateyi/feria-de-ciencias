@@ -12,9 +12,18 @@ using UnityEngine;
 /// 2D plano correspondiente.
 ///
 /// Carpeta: Assets/_Project/Scripts/
+///
+/// DESACTIVADO: reemplazado por el sistema de obstáculos.
+/// TrackGenerator ya no genera segmentos de decisión, así que este componente no
+/// se instancia nunca en partida. Se deja el script y el prefab Segment_Decision
+/// guardados por si se quiere volver al sistema viejo.
 /// </summary>
 public class DecisionPoint : MonoBehaviour
 {
+    [Header("Sistema de decisiones (DESACTIVADO)")]
+    [Tooltip("Apagado: los carteles de decisión fueron reemplazados por los obstáculos.")]
+    [SerializeField] private bool habilitado = false;
+
     [Header("Decisión")]
     [Tooltip("Decisión fija. Si la lista de abajo tiene elementos, se elige al azar " +
              "de ahí y este campo se ignora.")]
@@ -59,6 +68,9 @@ public class DecisionPoint : MonoBehaviour
 
     private void Update()
     {
+        // DESACTIVADO: reemplazado por el sistema de obstáculos.
+        if (!habilitado) return;
+
         if (_triggered || _resolved) return;
         if (PlayerController.Instance == null) return;
 

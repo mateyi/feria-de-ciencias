@@ -1,22 +1,37 @@
 using UnityEngine;
 
 /// <summary>
-/// Spawner de obstáculos y monedas que se coloca dentro de un segmento de pista.
-/// Elige aleatoriamente qué carril(es) bloquear y dónde poner monedas.
+/// Spawner que vive dentro de cada segmento de pista.
+///
+/// FASE B: los obstáculos ya NO se instancian acá. Este componente le avisa al
+/// ObstacleManager que el segmento existe, y el manager se encarga de todo:
+/// pool de objetos, dificultad por nivel, filas que nunca tapan los 3 carriles
+/// y distancia mínima entre filas.
+///
+/// Lo único que sigue haciendo este script es repartir las monedas, porque eso
+/// no depende de la dificultad.
 /// </summary>
 public class ObstacleSpawner : MonoBehaviour
 {
-    [Header("Prefabs")]
+    [Header("Legacy (ya no se usa)")]
+    [Tooltip("Se conserva sólo para no perder la referencia en el prefab. Los obstáculos " +
+             "ahora salen del pool del ObstacleManager usando ObstacleData.")]
     [SerializeField] private GameObject[] obstaclePrefabs;
-    [SerializeField] private GameObject   coinPrefab;
 
-    [Header("Configuración")]
-    [SerializeField] private int   obstacleCount  = 2;
-    [SerializeField] private int   coinCount      = 5;
-    [SerializeField] private float spawnZStart    = 5f;
-    [SerializeField] private float spawnZEnd      = 25f;
-    [SerializeField] private float coinHeight     = 0.8f;
-    [SerializeField] private float obstacleHeight = 0.5f;
+    [Header("Monedas")]
+    [SerializeField] private GameObject coinPrefab;
+
+    [Tooltip("Cantidad de latas de monedas que se reparten en el segmento.")]
+    [SerializeField] private int coinCount = 5;
+
+    [Header("Zona útil del segmento")]
+    [Tooltip("Z local donde empieza la zona útil del segmento.")]
+    [SerializeField] private float spawnZStart = 5f;
+
+    [Tooltip("Z local donde termina la zona útil del segmento.")]
+    [SerializeField] private float spawnZEnd = 25f;
+
+    [SerializeField] private float coinHeight = 0.8f;
 
     [Header("Zona segura de arranque")]
     [Tooltip("Los obstáculos solo se colocan a partir de esta Z del mundo. Sirve para que el " +
@@ -25,31 +40,26 @@ public class ObstacleSpawner : MonoBehaviour
 
     private void Start()
     {
-        SpawnObstacles();
+        PoblarObstaculos();
         SpawnCoins();
+        PoblarPickups();
     }
 
-    private void SpawnObstacles()
+    /// <summary>
+    /// Le pide al ObstacleManager que llene este segmento con filas de obstáculos
+    /// según el nivel actual. Si el manager no existe (escena de prueba), avisa
+    /// por consola y la pista queda limpia: nunca tira una excepción.
+    /// </summary>
+    private void PoblarObstaculos()
     {
-        if (obstaclePrefabs == null || obstaclePrefabs.Length == 0) return;
-
-        // Elegir carriles bloqueados (nunca los 3 a la vez)
-        int blockedLanes = Random.Range(1, LaneSystem.LaneCount);
-        int[] lanes = GetRandomLanes(blockedLanes);
-
-        foreach (int lane in lanes)
+        if (ObstacleManager.Instance == null)
         {
-            float x = LaneSystem.GetLaneX(lane);
-            float z = transform.position.z + Random.Range(spawnZStart, spawnZEnd);
-
-            // Zona segura de arranque: no colocar obstáculos cerca del punto de spawn.
-            if (z < minWorldZ) continue;
-
-            Vector3 pos = new Vector3(x, transform.position.y + obstacleHeight, z);
-
-            int idx = Random.Range(0, obstaclePrefabs.Length);
-            Instantiate(obstaclePrefabs[idx], pos, Quaternion.identity, transform);
+            Debug.LogWarning("[ObstacleSpawner] No hay ObstacleManager en la escena: " +
+                             "el segmento queda sin obstáculos.");
+            return;
         }
+
+        ObstacleManager.Instance.PoblarSegmento(transform, spawnZStart, spawnZEnd, minWorldZ);
     }
 
     private void SpawnCoins()
@@ -69,17 +79,15 @@ public class ObstacleSpawner : MonoBehaviour
         }
     }
 
-    private int[] GetRandomLanes(int count)
+    /// <summary>
+    /// Le pide al PickupManager que reparta los pickups de la Fase C en este
+    /// segmento (bebida isotónica, botines turbo, imán y chaleco). Si el manager
+    /// no existe (escena de prueba) el segmento queda sin pickups.
+    /// </summary>
+    private void PoblarPickups()
     {
-        int[] all = { 0, 1, 2 };
-        // Fisher-Yates shuffle
-        for (int i = all.Length - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (all[i], all[j]) = (all[j], all[i]);
-        }
-        int[] result = new int[count];
-        System.Array.Copy(all, result, count);
-        return result;
+        if (PickupManager.Instance == null) return;
+
+        PickupManager.Instance.PoblarSegmento(transform, spawnZStart, spawnZEnd, minWorldZ);
     }
 }

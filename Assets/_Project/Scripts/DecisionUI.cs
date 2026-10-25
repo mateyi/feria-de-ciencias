@@ -20,6 +20,10 @@ using System.Text;
 ///     FeedbackPanel (el cartel minimalista del resultado)
 ///
 /// Carpeta: Assets/_Project/Scripts/
+///
+/// DESACTIVADO: reemplazado por el sistema de obstáculos.
+/// El panel se mantiene armado en la escena pero nadie lo abre: DecisionManager
+/// está apagado y no quedan DecisionPoint en la pista.
 /// </summary>
 public class DecisionUI : MonoBehaviour
 {

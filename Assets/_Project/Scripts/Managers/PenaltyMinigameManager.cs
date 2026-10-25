@@ -140,13 +140,22 @@ public class PenaltyMinigameManager : MonoBehaviour
     [Range(0f, 0.8f)]
     [SerializeField] private float reduccionDuracionMaxima = 0.35f;
 
-    [Header("Dificultad del arquero (0 = nunca acierta, 1 = siempre)")]
+    [Header("Dificultad del arquero")]
+    [Tooltip("Probabilidad de que el arquero ATAJE el penal. 0.5 = mitad y mitad " +
+             "(la mitad de los tiros entran, la mitad los saca el arquero).")]
     [Range(0f, 1f)]
-    [SerializeField] private float goalkeeperAccuracy = 0.33f;
+    [SerializeField] private float goalkeeperAccuracy = 0.5f;
 
-    [Tooltip("Cuánto sube la precisión del arquero por cada nivel jugado.")]
+    [Tooltip("Cuánto sube la probabilidad de atajada por cada nivel jugado. " +
+             "En 0 el arquero se queda siempre en la probabilidad base.")]
     [Range(0f, 0.2f)]
-    [SerializeField] private float accuracyPorNivel = 0.05f;
+    [SerializeField] private float accuracyPorNivel = 0f;
+
+    [Tooltip("Tope duro de la probabilidad de atajada. La probabilidad nunca pasa " +
+             "de acá aunque se jueguen muchos niveles seguidos. 0.5 = nunca ataja " +
+             "más de la mitad de los tiros.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float techoProbabilidadAtajada = 0.5f;
 
     [Header("Tiempos de resultado (segundos)")]
     [SerializeField] private float tiempoMensajeGol = 2f;
@@ -604,50 +613,84 @@ public class PenaltyMinigameManager : MonoBehaviour
     // ═════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Hace elegir al arquero. Con probabilidad 'accuracy' adivina la columna del
-    /// tiro; si no, elige al azar entre las 3 zonas. La precisión sube con el nivel.
+    /// Hace elegir al arquero y decide, de una sola vez, si el penal termina en
+    /// gol o en atajada.
+    ///
+    /// CÓMO FUNCIONA (mitad y mitad):
+    ///   1. Se sortea UNA vez con la probabilidad de atajada (0.5 por defecto).
+    ///   2. Si le toca atajar, el arquero se tira a la MISMA columna del tiro
+    ///      (se ve que la saca bien).
+    ///   3. Si le toca que sea gol, se tira a una de las otras dos columnas
+    ///      (se ve que voló para el otro lado).
+    ///
+    /// Así la animación SIEMPRE coincide con el resultado: no queda el arquero
+    /// clavado en el medio mientras la pelota entra por el costado.
+    /// Antes se sorteaba la columna y después se comparaba, y eso duplicaba las
+    /// chances de atajada (adivinaba + acertaba de casualidad), por eso atajaba
+    /// casi siempre.
     /// </summary>
     private GoalkeeperAI.SaveZone ElegirZonaArquero(int zonaDelTiro)
     {
-        // Si no hay arquero, inventamos una zona para poder resolver el resultado.
-        if (goalkeeper == null)
-            return (GoalkeeperAI.SaveZone)UnityEngine.Random.Range(0, 3);
+        float probabilidad = ProbabilidadAtajadaEfectiva();
+        bool  ataja        = UnityEngine.Random.value < probabilidad;
 
-        float precision = PrecisiónEfectiva();
-
+        GoalkeeperAI.SaveZone columnaDelTiro = ColumnaDelTiro(zonaDelTiro);
         GoalkeeperAI.SaveZone elegida;
-        if (UnityEngine.Random.value < precision)
+
+        if (ataja)
         {
-            // Adivina: se tira a la misma columna que el tiro.
-            elegida = ColumnaDelTiro(zonaDelTiro);
-            goalkeeper.React(elegida);
+            // Se tira bien: cubre justo la columna del tiro.
+            elegida = columnaDelTiro;
         }
         else
         {
-            // Se tira al azar.
-            elegida = goalkeeper.React();
+            // Se tira mal: va a una de las otras dos columnas, así es gol.
+            elegida = ColumnaContraria(columnaDelTiro);
         }
 
+        // Le avisamos al arquero para que anime la estirada hacia esa columna.
+        goalkeeper?.React(elegida);
+
         if (modoDebug)
-            Debug.Log($"[Penal] Arquero eligió zona {elegida} (precisión {precision:P0})");
+            Debug.Log($"[Penal] Arquero: {elegida} | probabilidad de atajada {probabilidad:P0} " +
+                      $"| resultado {(ataja ? "ATAJADA" : "GOL")}");
 
         return elegida;
     }
 
     /// <summary>
-    /// Precisión real del arquero = base del Inspector + suba por nivel.
-    /// El nivel lo aporta GameData; si no existe, se queda en la base.
+    /// Probabilidad real de atajada = base del Inspector + suba por nivel,
+    /// menos lo que reste la mejora "Definición" de la tienda.
+    /// Siempre queda recortada por el techo configurado (0.5 por defecto), así
+    /// el arquero nunca vuelve a atajar casi todo por más niveles que se jueguen.
     /// </summary>
-    private float PrecisiónEfectiva()
+    private float ProbabilidadAtajadaEfectiva()
     {
         int nivel = 1;
         if (GameData.Instance != null) nivel = Mathf.Max(1, GameData.Instance.CurrentLevel);
 
-        // Mejora "Definición" de la tienda: el arquero adivina menos.
+        // Mejora "Definición" de la tienda: el arquero ataja menos.
         float reduccion = UpgradeManager.Instance != null
             ? UpgradeManager.Instance.ReduccionPrecisionArquero : 0f;
 
-        return Mathf.Clamp01(goalkeeperAccuracy + accuracyPorNivel * (nivel - 1) - reduccion);
+        float probabilidad = goalkeeperAccuracy + accuracyPorNivel * (nivel - 1) - reduccion;
+
+        // El techo se recorta a 0..1 por las dudas de que en el Inspector quede
+        // un valor raro, y después se aplica como tope superior.
+        float techo = Mathf.Clamp01(techoProbabilidadAtajada);
+        return Mathf.Clamp(Mathf.Clamp01(probabilidad), 0f, techo);
+    }
+
+    /// <summary>
+    /// Devuelve una de las DOS columnas que no son la del tiro, sorteada al azar.
+    /// Sirve para que, cuando el arquero se tira mal, no se lo vea siempre
+    /// volando para el mismo lado.
+    /// </summary>
+    private static GoalkeeperAI.SaveZone ColumnaContraria(GoalkeeperAI.SaveZone columnaDelTiro)
+    {
+        int indiceTiro = (int)columnaDelTiro;                 // 0, 1 o 2
+        int salto      = UnityEngine.Random.value < 0.5f ? 1 : 2;
+        return (GoalkeeperAI.SaveZone)((indiceTiro + salto) % 3);
     }
 
     /// <summary>

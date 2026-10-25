@@ -1,0 +1,139 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a65c0fce997560e4597c49ca260de9e8, type: 3}
+  m_Name: LevelConfig
+  m_EditorClassIdentifier: Assembly-CSharp::LevelConfig
+  niveles:
+  - nivel: 1
+    nombre: Entrenamiento
+    multiplicadorVelocidad: 1
+    filasPorSegmento: 1
+    margenEntreFilas: 30
+    probabilidadDosCarriles: 0
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 2
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 0.6
+  - nivel: 2
+    nombre: Fase de grupos
+    multiplicadorVelocidad: 1.05
+    filasPorSegmento: 1.2
+    margenEntreFilas: 28
+    probabilidadDosCarriles: 0.1
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 1.5
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: a49e1a28839ee4349b552f7434917538, type: 2}
+      peso: 1
+  - nivel: 3
+    nombre: Octavos de final
+    multiplicadorVelocidad: 1.12
+    filasPorSegmento: 1.5
+    margenEntreFilas: 26
+    probabilidadDosCarriles: 0.2
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: a49e1a28839ee4349b552f7434917538, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 9ba47379a961d6c4b918b6a7e24dc94d, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 593f9ec8ee8a83b4eb0f84ada4fed912, type: 2}
+      peso: 0.8
+  - nivel: 4
+    nombre: Cuartos de final
+    multiplicadorVelocidad: 1.2
+    filasPorSegmento: 1.8
+    margenEntreFilas: 24
+    probabilidadDosCarriles: 0.35
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 0.6
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: a49e1a28839ee4349b552f7434917538, type: 2}
+      peso: 0.9
+    - dato: {fileID: 11400000, guid: 9ba47379a961d6c4b918b6a7e24dc94d, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 593f9ec8ee8a83b4eb0f84ada4fed912, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: e23d8a11b087bf24992a15042d70f767, type: 2}
+      peso: 0.7
+    - dato: {fileID: 11400000, guid: 32c03fe4eb219cc488ac19343a42aebe, type: 2}
+      peso: 0.6
+  - nivel: 5
+    nombre: Semifinal
+    multiplicadorVelocidad: 1.28
+    filasPorSegmento: 2.2
+    margenEntreFilas: 22
+    probabilidadDosCarriles: 0.5
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 0.6
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 0.5
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 1.2
+    - dato: {fileID: 11400000, guid: a49e1a28839ee4349b552f7434917538, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 9ba47379a961d6c4b918b6a7e24dc94d, type: 2}
+      peso: 1.2
+    - dato: {fileID: 11400000, guid: 593f9ec8ee8a83b4eb0f84ada4fed912, type: 2}
+      peso: 1.3
+    - dato: {fileID: 11400000, guid: e23d8a11b087bf24992a15042d70f767, type: 2}
+      peso: 0.9
+    - dato: {fileID: 11400000, guid: 32c03fe4eb219cc488ac19343a42aebe, type: 2}
+      peso: 0.7
+    - dato: {fileID: 11400000, guid: 9125f6954afadf3428d0419c4ccb7aa7, type: 2}
+      peso: 0.8
+  - nivel: 6
+    nombre: Final
+    multiplicadorVelocidad: 1.35
+    filasPorSegmento: 2.6
+    margenEntreFilas: 20
+    probabilidadDosCarriles: 0.6
+    permitidos:
+    - dato: {fileID: 11400000, guid: f66585ba09c75cb41bfe78c2afe667b7, type: 2}
+      peso: 0.5
+    - dato: {fileID: 11400000, guid: 900960ba9c5928d489d75e44c3921861, type: 2}
+      peso: 0.4
+    - dato: {fileID: 11400000, guid: 45e48c9c95fad494cbf58105a7014a46, type: 2}
+      peso: 1.4
+    - dato: {fileID: 11400000, guid: a49e1a28839ee4349b552f7434917538, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 9ba47379a961d6c4b918b6a7e24dc94d, type: 2}
+      peso: 1.4
+    - dato: {fileID: 11400000, guid: 593f9ec8ee8a83b4eb0f84ada4fed912, type: 2}
+      peso: 1.5
+    - dato: {fileID: 11400000, guid: e23d8a11b087bf24992a15042d70f767, type: 2}
+      peso: 1.1
+    - dato: {fileID: 11400000, guid: 32c03fe4eb219cc488ac19343a42aebe, type: 2}
+      peso: 0.8
+    - dato: {fileID: 11400000, guid: 9125f6954afadf3428d0419c4ccb7aa7, type: 2}
+      peso: 1
+    - dato: {fileID: 11400000, guid: 95e78a3ff5dd9a1429b5c57070368bc1, type: 2}
+      peso: 0.6
+  tiempoInvulnerabilidad: 1
+  velocidadLateralPorDefecto: 7

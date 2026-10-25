@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Haaland
   nombre: Haaland
   pais: Noruega
-  apodo: 
+  apodo: Haaland
   dorsal: 9
   retrato: {fileID: 21300000, guid: 6a473fd442c764c4d873ff1c23a5a350, type: 3}
   colorCamiseta: {r: 0.7294118, g: 0.047058824, b: 0.18431373, a: 1}
