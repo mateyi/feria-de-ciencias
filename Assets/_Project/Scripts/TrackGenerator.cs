@@ -17,7 +17,14 @@ public class TrackGenerator : MonoBehaviour
     [Header("Configuración")]
     [SerializeField] private int   segmentsAhead    = 5;
     [SerializeField] private int   segmentsBehind   = 2;
-    [SerializeField] private int   decisionInterval = 4; // cada N segmentos normales
+    [Tooltip("Cada cuántos segmentos normales aparece uno de decisión. " +
+             "En 1 el cartel aparece en segmentos alternados.")]
+    [SerializeField] private int   decisionInterval = 1;
+
+    [Tooltip("Z a partir de la cual ya no se generan segmentos de decisión. " +
+             "Sirve para que el último cartel quede ANTES del arco de META " +
+             "(z=300) y no caiga dentro del túnel.")]
+    [SerializeField] private float decisionStopZ    = 270f;
 
     private readonly List<TrackSegment> _activeSegments = new List<TrackSegment>();
     private Vector3 _nextSpawnPos;
@@ -151,7 +158,8 @@ public class TrackGenerator : MonoBehaviour
     private void SpawnNextSegment()
     {
         bool spawnDecision = _normalSegmentsSinceDecision >= decisionInterval
-                             && decisionSegmentPrefab != null;
+                             && decisionSegmentPrefab != null
+                             && _nextSpawnPos.z < decisionStopZ;
 
         if (spawnDecision)
         {

@@ -19,6 +19,17 @@ public class PlaceSceneObjects
 
     private static void PlaceInitialTrack()
     {
+        // IMPORTANTE: si la escena ya tiene un TrackGenerator, la pista se genera en
+        // runtime. Colocar segmentos a mano acá crea una SEGUNDA pista superpuesta
+        // (obstáculos duplicados) que hacía que el jugador muriera a los pocos metros
+        // del spawn y pareciera que "no avanza".
+        if (UnityEngine.Object.FindFirstObjectByType<TrackGenerator>() != null)
+        {
+            Debug.LogWarning("[MundialRunner] Hay un TrackGenerator en la escena: se omite la " +
+                             "pista manual porque la genera TrackGenerator en runtime.");
+            return;
+        }
+
         // Verificar si ya existe pista en la escena
         if (GameObject.Find("Segment_Normal(Clone)") != null) return;
         if (GameObject.Find("Segment_Normal") != null) return;

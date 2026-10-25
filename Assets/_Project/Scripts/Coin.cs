@@ -19,6 +19,17 @@ public class Coin : MonoBehaviour
     private void Start()
     {
         _startPos = transform.position;
+
+        // Mejora "Imán de monedas": agranda el radio de recogida de esta lata.
+        if (UpgradeManager.Instance != null)
+        {
+            float extra = UpgradeManager.Instance.RadioImanExtra;
+            if (extra > 0f)
+            {
+                var col = GetComponent<SphereCollider>();
+                if (col != null) col.radius += extra;
+            }
+        }
     }
 
     private void Update()
@@ -33,7 +44,9 @@ public class Coin : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            RunnerGameManager.Instance?.AddCoin();
+            // Mejora "Suerte": algunas latas valen más de una moneda.
+            int monedas = 1 + (UpgradeManager.Instance != null ? UpgradeManager.Instance.MonedasExtra : 0);
+            RunnerGameManager.Instance?.AddCoin(monedas);
             PlayerStats.Instance?.AddEnergy(energyRestore);
             gameObject.SetActive(false);
         }

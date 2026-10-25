@@ -68,15 +68,16 @@ public class DecisionManager : MonoBehaviour
         decisionUI?.Hide();
         RunnerGameManager.Instance?.ResumeGame();
 
-        // Mostrar feedback breve
+        // Cartel minimalista con los tres atributos que movió la elección.
         string label = isLeft ? _currentDecision.leftLabel : _currentDecision.rightLabel;
         string desc  = isLeft ? _currentDecision.leftDescription : _currentDecision.rightDescription;
-        StartCoroutine(ShowFeedback(label, desc, consequence));
+        bool positivo = isLeft ? _currentDecision.leftIsPositive : _currentDecision.rightIsPositive;
+        StartCoroutine(ShowFeedback(label, desc, consequence, positivo));
     }
 
-    private IEnumerator ShowFeedback(string label, string desc, StatConsequence c)
+    private IEnumerator ShowFeedback(string label, string desc, StatConsequence c, bool positivo)
     {
-        decisionUI?.ShowFeedback(label, desc, c);
+        decisionUI?.ShowFeedback(label, desc, c, positivo);
         yield return new WaitForSeconds(2.5f);
         decisionUI?.HideFeedback();
     }

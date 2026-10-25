@@ -37,10 +37,12 @@ public class GameOverUI : MonoBehaviour
         if (statsText && PlayerStats.Instance != null)
         {
             var s = PlayerStats.Instance;
-            statsText.text = $"⚡ Velocidad: {s.speed:F0}\n" +
-                             $"💪 Energía: {s.energy:F0}\n" +
-                             $"⚽ Habilidad: {s.skill:F0}\n" +
-                             $"🌟 Popularidad: {s.popularity:F0}";
+            // Sin emojis: la fuente del proyecto no tiene esos glifos y Unity los
+            // reemplaza por "□" (warning en consola).
+            statsText.text = $"Velocidad: {s.speed:F0}\n" +
+                             $"Energía: {s.energy:F0}\n" +
+                             $"Habilidad: {s.skill:F0}\n" +
+                             $"Popularidad: {s.popularity:F0}";
         }
     }
 

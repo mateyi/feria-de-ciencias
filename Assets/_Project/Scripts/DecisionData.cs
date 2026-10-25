@@ -26,4 +26,15 @@ public class DecisionData : ScriptableObject
     [Header("Visual")]
     public Color leftColor  = new Color(0.2f, 0.8f, 0.3f);
     public Color rightColor = new Color(0.9f, 0.3f, 0.2f);
+
+    [Header("Iconos (Fase 13)")]
+    [Tooltip("Icono plano 2D que se pega sobre el cartel 3D de la opción izquierda.")]
+    public Sprite leftIcon;
+    [Tooltip("Icono plano 2D que se pega sobre el cartel 3D de la opción derecha.")]
+    public Sprite rightIcon;
+
+    [Tooltip("Marca la casilla si la opción es BUENA para el futbolista. " +
+             "El cartel se pinta verde cuando es positiva y rojo cuando es negativa.")]
+    public bool leftIsPositive  = true;
+    public bool rightIsPositive = false;
 }

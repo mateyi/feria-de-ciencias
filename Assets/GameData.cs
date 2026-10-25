@@ -1,24 +1,25 @@
 using UnityEngine;
 
 /// <summary>
-/// Guarda los datos persistentes del jugador: monedas, mejor puntaje y nivel actual.
-/// Usa PlayerPrefs para guardar entre sesiones y un evento para avisar a la UI cuando algo cambia.
-/// Va en un GameObject vacio llamado "GameData".
+/// Datos persistentes del jugador: monedas, mejor puntaje y nivel actual.
+///
+/// FASE 16: el guardado pasó a SaveManager, que escribe un archivo JSON en
+/// Application.persistentDataPath. Esta clase queda como fachada para que el
+/// resto del juego (HUD, menú, tienda) siga usando GameData.Instance sin
+/// enterarse del cambio.
+///
+/// Va en un GameObject vacío llamado "GameData".
 /// </summary>
 public class GameData : MonoBehaviour
 {
     public static GameData Instance { get; private set; }
 
-    public int Coins { get; private set; }
-    public int BestScore { get; private set; }
-    public int CurrentLevel { get; private set; }
+    public int Coins        => SaveManager.Data.coins;
+    public int BestScore    => SaveManager.Data.bestScore;
+    public int CurrentLevel => SaveManager.Data.currentLevel;
 
     // La UI se suscribe a esto para refrescarse sola cuando cambian los datos
     public event System.Action OnDataChanged;
-
-    private const string KEY_COINS = "coins";
-    private const string KEY_BEST = "bestScore";
-    private const string KEY_LEVEL = "currentLevel";
 
     private void Awake()
     {
@@ -29,52 +30,38 @@ public class GameData : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject); // sobrevive al cambiar de escena
-        Load();
+
+        SaveManager.Cargar();
     }
 
     public void AddCoins(int amount)
     {
-        Coins += amount;
-        Save();
+        SaveManager.Data.coins += amount;
+        SaveManager.Guardar();
         OnDataChanged?.Invoke();
     }
 
     public bool SpendCoins(int amount)
     {
-        if (Coins < amount) return false;
-        Coins -= amount;
-        Save();
+        if (SaveManager.Data.coins < amount) return false;
+        SaveManager.Data.coins -= amount;
+        SaveManager.Guardar();
         OnDataChanged?.Invoke();
         return true;
     }
 
     public void TrySetBestScore(int score)
     {
-        if (score <= BestScore) return;
-        BestScore = score;
-        Save();
+        if (score <= SaveManager.Data.bestScore) return;
+        SaveManager.Data.bestScore = score;
+        SaveManager.Guardar();
         OnDataChanged?.Invoke();
     }
 
     public void SetCurrentLevel(int level)
     {
-        CurrentLevel = level;
-        Save();
+        SaveManager.Data.currentLevel = Mathf.Max(1, level);
+        SaveManager.Guardar();
         OnDataChanged?.Invoke();
-    }
-
-    private void Load()
-    {
-        Coins = PlayerPrefs.GetInt(KEY_COINS, 0);
-        BestScore = PlayerPrefs.GetInt(KEY_BEST, 0);
-        CurrentLevel = PlayerPrefs.GetInt(KEY_LEVEL, 1);
-    }
-
-    private void Save()
-    {
-        PlayerPrefs.SetInt(KEY_COINS, Coins);
-        PlayerPrefs.SetInt(KEY_BEST, BestScore);
-        PlayerPrefs.SetInt(KEY_LEVEL, CurrentLevel);
-        PlayerPrefs.Save();
     }
 }

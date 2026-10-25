@@ -18,6 +18,11 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] private float coinHeight     = 0.8f;
     [SerializeField] private float obstacleHeight = 0.5f;
 
+    [Header("Zona segura de arranque")]
+    [Tooltip("Los obstáculos solo se colocan a partir de esta Z del mundo. Sirve para que el " +
+             "jugador tenga pista libre al empezar y no muera a los pocos metros del spawn.")]
+    [SerializeField] private float minWorldZ = 35f;
+
     private void Start()
     {
         SpawnObstacles();
@@ -36,6 +41,10 @@ public class ObstacleSpawner : MonoBehaviour
         {
             float x = LaneSystem.GetLaneX(lane);
             float z = transform.position.z + Random.Range(spawnZStart, spawnZEnd);
+
+            // Zona segura de arranque: no colocar obstáculos cerca del punto de spawn.
+            if (z < minWorldZ) continue;
+
             Vector3 pos = new Vector3(x, transform.position.y + obstacleHeight, z);
 
             int idx = Random.Range(0, obstaclePrefabs.Length);

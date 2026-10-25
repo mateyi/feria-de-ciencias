@@ -233,6 +233,7 @@ GameObject:
   - component: {fileID: 875043062723979655}
   - component: {fileID: 356149459304199284}
   - component: {fileID: 8282344654507367004}
+  - component: {fileID: 71347815349117705}
   m_Layer: 0
   m_Name: Zone_Bottom_L
   m_TagString: Untagged
@@ -333,6 +334,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &71347815349117705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1404115453815359122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 3
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 356149459304199284}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &1629750496402945949
 GameObject:
   m_ObjectHideFlags: 0
@@ -345,6 +363,7 @@ GameObject:
   - component: {fileID: 436224093605800195}
   - component: {fileID: 4398778906800975853}
   - component: {fileID: 4720788912377178755}
+  - component: {fileID: 2265828509737808543}
   m_Layer: 0
   m_Name: Zone_Top_L
   m_TagString: Untagged
@@ -445,6 +464,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2265828509737808543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629750496402945949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 0
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 4398778906800975853}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &2102356528947231398
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,6 +710,7 @@ GameObject:
   - component: {fileID: 7930725197343541811}
   - component: {fileID: 7094427180882271846}
   - component: {fileID: 8323832134642158120}
+  - component: {fileID: 4673346677177123375}
   m_Layer: 0
   m_Name: Zone_Bottom_R
   m_TagString: Untagged
@@ -774,6 +811,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4673346677177123375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3750840698323472112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 5
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 7094427180882271846}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &4296156169832855378
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,6 +840,7 @@ GameObject:
   - component: {fileID: 5125223983424101471}
   - component: {fileID: 2661401707542261184}
   - component: {fileID: 5938061114332424617}
+  - component: {fileID: 2987726940210741925}
   m_Layer: 0
   m_Name: Zone_Top_R
   m_TagString: Untagged
@@ -886,6 +941,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2987726940210741925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4296156169832855378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 2
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 2661401707542261184}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &4510698342410733245
 GameObject:
   m_ObjectHideFlags: 0
@@ -1168,6 +1240,7 @@ GameObject:
   - component: {fileID: 4480380133290546660}
   - component: {fileID: 5566978376497163881}
   - component: {fileID: 5302054571039047017}
+  - component: {fileID: 488534932319065300}
   m_Layer: 0
   m_Name: Zone_Bottom_C
   m_TagString: Untagged
@@ -1268,6 +1341,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &488534932319065300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5898524376635486064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 4
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 5566978376497163881}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &6309226096748700094
 GameObject:
   m_ObjectHideFlags: 0
@@ -1370,6 +1460,7 @@ GameObject:
   - component: {fileID: 8612888988960710602}
   - component: {fileID: 9057128324804874383}
   - component: {fileID: 5427146321771954300}
+  - component: {fileID: 5121248921651009668}
   m_Layer: 0
   m_Name: Zone_Top_C
   m_TagString: Untagged
@@ -1470,6 +1561,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.2}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5121248921651009668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7269525984879949096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2269b23ee5712874a8e96d0669380845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PenaltyZone
+  zoneId: 1
+  aimTarget: {fileID: 0}
+  zoneRenderer: {fileID: 9057128324804874383}
+  idleColor: {r: 1, g: 0.85, b: 0.1, a: 0.2}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!1 &8554986261903540094
 GameObject:
   m_ObjectHideFlags: 0

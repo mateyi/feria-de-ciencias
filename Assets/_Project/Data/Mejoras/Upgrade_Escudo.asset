@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69c45338c04a1194fa73c9f2c80dca78, type: 3}
+  m_Name: Upgrade_Escudo
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
+  id: 7
+  nombre: Escudo
+  descripcion: "Aguant\xE1s un choque por partida."
+  icono: {fileID: 21300000, guid: e4da0d4eed4280646900f28ca2d79530, type: 3}
+  nivelMaximo: 5
+  costoBase: 120
+  multiplicadorCosto: 1.7
+  efectoPorNivel: +1 choque gratis por nivel
